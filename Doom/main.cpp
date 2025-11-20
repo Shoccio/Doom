@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "Player.h"
+#include "RayCaster.h"
 
 const int SCREEN_WIDTH = 1920, SCREEN_HEIGHT = 1080, BORDER_SIZE = 50;
 const float PLAYER_SIZE = 50.f;
@@ -13,14 +14,15 @@ void setWalls(sf::VertexArray*, sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Ve
 void DrawObjects(sf::RenderWindow&);
 
 vector<sf::VertexArray*> Objects;
-
+RayCaster* rayCaster = nullptr;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ SCREEN_WIDTH, SCREEN_HEIGHT }), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "SFML works!", sf::Style::Default, sf::State::Windowed);
     Player player;
 
     InitializeWalls();
+    rayCaster = new RayCaster(Objects);
 
     while (window.isOpen())
     {
@@ -30,26 +32,25 @@ int main()
                 window.close();
         }
 
-
-
-
         player.Movement();
+        rayCaster->castRays(player);
 
-        window.clear(sf::Color::Blue);
+        window.clear(sf::Color::White);
         DrawObjects(window);
-
+        rayCaster->draw(window);
         window.draw(player.getSprite());
         window.display();
-
-        
     }
+
+    delete rayCaster;
+    return 0;
 }
 
 void InitializeWalls()
 {
     sf::VertexArray* walls = new sf::VertexArray(sf::PrimitiveType::LineStrip, 5);
-    setWalls(walls, sf::Vector2f(0.f + BORDER_SIZE, 0.f + BORDER_SIZE), sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE,  0.f + BORDER_SIZE),
-        			 sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE), sf::Vector2f(0.f + BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE));
+    setWalls(walls, sf::Vector2f(0.f + BORDER_SIZE, 0.f + BORDER_SIZE), sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE, 0.f + BORDER_SIZE),
+        sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE), sf::Vector2f(0.f + BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE));
 
     Objects.push_back(walls);
 }
@@ -58,16 +59,15 @@ void setWalls(sf::VertexArray* wall, sf::Vector2f point1, sf::Vector2f point2, s
 {
     (*wall)[0].position = point1;
     (*wall)[1].position = point2;
-	(*wall)[2].position = point3;
-	(*wall)[3].position = point4;
+    (*wall)[2].position = point3;
+    (*wall)[3].position = point4;
     (*wall)[4].position = point1;
 
     (*wall)[0].color = sf::Color::Red;
-	(*wall)[1].color = sf::Color::Red;
+    (*wall)[1].color = sf::Color::Red;
     (*wall)[2].color = sf::Color::Red;
     (*wall)[3].color = sf::Color::Red;
     (*wall)[4].color = sf::Color::Red;
-
 }
 
 void DrawObjects(sf::RenderWindow& window)

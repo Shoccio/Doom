@@ -137,9 +137,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RayCaster.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RayCaster.h" />
     <ClInclude Include="Wall.h" />
   </ItemGroup>
   <ItemGroup>
