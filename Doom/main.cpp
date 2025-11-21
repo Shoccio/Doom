@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "Player.h"
+#include "RayCast.h"
 #include "RayCaster.h"
 
 const int SCREEN_WIDTH = 1920, SCREEN_HEIGHT = 1080, BORDER_SIZE = 50;
@@ -10,10 +11,11 @@ const float PLAYER_SIZE = 50.f;
 using namespace std;
 
 void InitializeWalls();
-void setWalls(sf::VertexArray*, sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Vector2f);
+void setWalls(sf::VertexArray&, sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Vector2f);
 void DrawObjects(sf::RenderWindow&);
 
-vector<sf::VertexArray*> Objects;
+//vector<sf::VertexArray*> Objects;
+vector<sf::VertexArray> objects;
 RayCaster* rayCaster = nullptr;
 
 int main()
@@ -22,8 +24,8 @@ int main()
     Player player;
 
     InitializeWalls();
-    rayCaster = new RayCaster(Objects);
-
+    //rayCaster = new RayCaster(Objects);
+    RayCast rayCast(player, objects, SCREEN_HEIGHT, SCREEN_WIDTH);
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -32,48 +34,52 @@ int main()
                 window.close();
         }
 
+        std::cout << "Player Rotation: " << player.getRotation().asDegrees() << " - " << "Player Position: (" << player.getSprite().getPosition().x << ", " << player.getSprite().getPosition().y << ")" << std::endl;
+
         player.Movement();
-        rayCaster->castRays(player);
+        //rayCaster->castRays(player);
+        rayCast.update();
 
         window.clear(sf::Color::White);
         DrawObjects(window);
-        rayCaster->draw(window);
+        //rayCaster->draw(window);
+        rayCast.draw(window);
         window.draw(player.getSprite());
         window.display();
     }
 
-    delete rayCaster;
+    //delete rayCaster;
     return 0;
 }
 
 void InitializeWalls()
 {
-    sf::VertexArray* walls = new sf::VertexArray(sf::PrimitiveType::LineStrip, 5);
+    sf::VertexArray walls = sf::VertexArray(sf::PrimitiveType::LineStrip, 5);
     setWalls(walls, sf::Vector2f(0.f + BORDER_SIZE, 0.f + BORDER_SIZE), sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE, 0.f + BORDER_SIZE),
         sf::Vector2f(SCREEN_WIDTH - BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE), sf::Vector2f(0.f + BORDER_SIZE, SCREEN_HEIGHT - BORDER_SIZE));
 
-    Objects.push_back(walls);
+    objects.push_back(walls);
 }
 
-void setWalls(sf::VertexArray* wall, sf::Vector2f point1, sf::Vector2f point2, sf::Vector2f point3, sf::Vector2f point4)
+void setWalls(sf::VertexArray& wall, sf::Vector2f point1, sf::Vector2f point2, sf::Vector2f point3, sf::Vector2f point4)
 {
-    (*wall)[0].position = point1;
-    (*wall)[1].position = point2;
-    (*wall)[2].position = point3;
-    (*wall)[3].position = point4;
-    (*wall)[4].position = point1;
+    wall[0].position = point1;
+    wall[1].position = point2;
+    wall[2].position = point3;
+    wall[3].position = point4;
+    wall[4].position = point1;
 
-    (*wall)[0].color = sf::Color::Red;
-    (*wall)[1].color = sf::Color::Red;
-    (*wall)[2].color = sf::Color::Red;
-    (*wall)[3].color = sf::Color::Red;
-    (*wall)[4].color = sf::Color::Red;
+    wall[0].color = sf::Color::Red;
+    wall[1].color = sf::Color::Red;
+    wall[2].color = sf::Color::Red;
+    wall[3].color = sf::Color::Red;
+    wall[4].color = sf::Color::Red;
 }
 
 void DrawObjects(sf::RenderWindow& window)
 {
-    for (auto object : Objects)
+    for (auto object : objects)
     {
-        window.draw(*object);
+        window.draw(object);
     }
 }
